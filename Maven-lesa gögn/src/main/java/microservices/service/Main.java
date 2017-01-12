@@ -3,21 +3,25 @@ package microservices.service;
 import org.codehaus.jackson.map.ObjectMapper;
 import java.net.*;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.apache.http.client.HttpComponents;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.JsonNode;
+import static java.net.http.HttpRequest.*;
 
 
-public class ReadDb {
+
+public class Main {
 
   public static void main(String[] args)
   {
     
-      HttpResponse<String> response = Unirest.get("https://api.themoviedb.org/3/movie/8?language=en-US&api_key=93a9fe8c0148b7c701f87801c1068f1e")
-      .body("{}")
-      .asString();
+      //HttpResponse<JsonNode> response = Unirest.get("https://api.themoviedb.org/3/movie/8?language=en-US&api_key=93a9fe8c0148b7c701f87801c1068f1e").body("{}").asJson();
+      HttpRequest request = Unirest.get("https://api.themoviedb.org/3/movie/8?language=en-US&api_key=93a9fe8c0148b7c701f87801c1068f1e");
 
-      ObjectMapper mapper=new ObjectMapper();
-      JsonNode jsonNode=mapper.readValue(response, JsonNode.class);
-      System.out.println(jsonNode);
+  
+      //ObjectMapper mapper=new ObjectMapper();
+      //JsonNode jsonNode=mapper.readValue(response, JsonNode.class);
+      System.out.println(request);
   }
 
 }
