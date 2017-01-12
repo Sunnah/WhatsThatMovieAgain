@@ -1,9 +1,9 @@
 package microservices.service;
 
-import java.io.File;
 import org.codehaus.jackson.map.ObjectMapper;
 import java.net.*;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.apache.http.client.HttpComponents;
 
 
 public class ReadDb {
