@@ -4,14 +4,20 @@ import java.io.IOException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import java.io.FileWriter;
+
+
 
 public class Main {
   OkHttpClient client = new OkHttpClient();
 
-  String run(String url) throws IOException {
+  String getWebData(int i) throws IOException {
 
     Request request = new Request.Builder()
-        .url("https://api.themoviedb.org/3/discover/movie?page=1&include_video=false&include_adult=false&sort_by=popularity.desc&language=en-US&api_key=93a9fe8c0148b7c701f87801c1068f1e")
+        .url("https://api.themoviedb.org/3/movie/"+i+"?api_key=93a9fe8c0148b7c701f87801c1068f1e&append_to_response=casts,keywords")
         .build();
 
     try{
@@ -23,84 +29,85 @@ public class Main {
     }
   }
 
-  public static void main(String[] args) throws IOException {
-    Main example = new Main();
-    String response = example.run("https://raw.github.com/square/okhttp/master/README.md");
-    System.out.println(response);
-  }
-}
+  int latest()  throws IOException {
 
-/*
-import org.codehaus.jackson.map.ObjectMapper;
-import java.net.*;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.JsonNode;
-import static java.net.http.HttpRequest.*;
-*/
-/*
-import okhttp3.OkHttpClient;
-//import javax.ws.rs.core.MediaType;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-*/
-/*
-import java.io.IOException;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
-
-public class Main {
-
-  public static void main(String[] args)
-  {
-  /*  
-      //HttpResponse<JsonNode> response = Unirest.get("https://api.themoviedb.org/3/movie/8?language=en-US&api_key=93a9fe8c0148b7c701f87801c1068f1e").body("{}").asJson();
-      HttpRequest request = Unirest.get("https://api.themoviedb.org/3/movie/8?language=en-US&api_key=93a9fe8c0148b7c701f87801c1068f1e");
-
-  
-      //ObjectMapper mapper=new ObjectMapper();
-      //JsonNode jsonNode=mapper.readValue(response, JsonNode.class);
-      System.out.println(request);
-*//*
-      OkHttpClient client = new OkHttpClient();
-
-		MediaType mediaType = MediaType.parse("application/octet-stream");
-		RequestBody body = RequestBody.create(mediaType, "{}");
-		Request request = new Request.Builder()
-		  .url("https://api.themoviedb.org/3/discover/movie?page=1&include_video=false&include_adult=false&sort_by=popularity.desc&language=en-US&api_key=93a9fe8c0148b7c701f87801c1068f1e")
-		  .get()
-		  .build();
-
-		Response response = client.newCall(request).execute();
-		PostExample example = new PostExample();
-     	String response = example.post("http://www.roundsapp.com/post", json);
-    	System.out.println(response);
-  }
-
-}
-
-public class PostExample {
-  public static final MediaType JSON
-      = MediaType.parse("application/json; charset=utf-8");
-
-  OkHttpClient client = new OkHttpClient();
-
-  String post(String url, String json) throws IOException {
-    RequestBody body = RequestBody.create(JSON, json);
     Request request = new Request.Builder()
-        .url(url)
-        .post(body)
+        .url("https://api.themoviedb.org/3/movie/latest?api_key=93a9fe8c0148b7c701f87801c1068f1e&language=en-US")
         .build();
-    try (Response response = client.newCall(request).execute()) {
-      return response.body().string();
+
+    try{
+      Response response = client.newCall(request).execute();
+      int id = getId(response.body().string());
+      System.out.println(id);
+      return id;//response.body().string();
+    }
+    catch(IOException e){
+      return 0;
     }
   }
 
+  int getId(String s){
+    String [] part = s.split(",");
+    for(int n=0; n<part.length;n++){
+      if(part[n].matches("\"id\".*")){
+        System.out.println(part[n]);
+        return Integer.parseInt(part[n].split(":")[1]);
+      }
+    }
+    return 0;
+  }
 
+  String getInfo(JSONObject json){
+    //try{
+      if(json.get("title")!=null){
+        return json.get("title").toString();  
+      }
+      else return null; 
+   /* }
+    catch(ParseException e){
+      return "villa";
+    }*/
+  }
+
+
+  public static void main(String[] args) throws Exception {
+    Main example = new Main();
+    FileWriter fileWriter=null;
+    try{
+      fileWriter = new FileWriter("movieinf.csv");
+      int max= example.latest();
+      for(int n=0; n<=max; n++){
+        String response = example.getWebData(n);
+        if(response.split(",")[0].matches(".*\"status_code\":25")){
+          System.out.println("þyrfti að gera ehv hér");
+          response=example.getWebData(n);
+        }
+        String s=null;
+        if(!response.split(",")[0].matches(".*\"status_code\":34")){
+          try{
+            JSONObject json = (JSONObject)new JSONParser().parse(response);
+            s = example.getInfo(json);
+          }
+          catch(ParseException e){
+            s="villa";
+          }
+          fileWriter.append("\n");
+          fileWriter.append(s);
+        }
+      }
+    }
+      catch (Exception e) {         
+        System.out.println("Error in CsvFileWriter !!!");
+        e.printStackTrace();
+      }
+      finally {
+        try {
+          fileWriter.flush();
+          fileWriter.close();
+        } catch (IOException e) {
+          System.out.println("Error while flushing/closing fileWriter !!!");
+          e.printStackTrace();
+        }
+      }
+    }
 }
-*/
