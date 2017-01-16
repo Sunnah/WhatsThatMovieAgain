@@ -86,12 +86,12 @@ public class Main {
       JSONArray keyWords = new JSONArray();
       for(int i = 0; i<ja.size(); i++){
         JSONObject jo1 = (JSONObject) ja.get(i);
-        System.out.println(jo1.get("name").toString());
+        //System.out.println(jo1.get("name").toString());
         keyWords.add(jo1.get("name").toString());
 
       }
       //JSONObject jo1 = (JSONObject) ja.get(0);
-      System.out.println("Hér er talan"+keyWords.size());
+      //System.out.println("Hér er talan"+keyWords.size());
       return keyWords;
 
     //}
@@ -114,7 +114,7 @@ public class Main {
           //int tala=t.split(",").length/2;
           if(number>longest){
             longest=number;
-            //System.out.println("her er talan number"+" "+number);
+            System.out.println("her er talan number"+" "+number);
           }
         }
       }
@@ -132,10 +132,10 @@ public class Main {
     //System.out.println(example.getKeywords("genres");
     //System.out.println("genres: "+genres);
     
-    String response = example.getWebData(138);
+    //String response = example.getWebData(138);
     try{
-      JSONObject json = (JSONObject)new JSONParser().parse(response); 
-      System.out.println(example.getKeywords(json)); 
+      //JSONObject json = (JSONObject)new JSONParser().parse(response); 
+      //System.out.println(example.getKeywords(json)); 
       System.out.println(example.getLongest("keywords"));
     }
     catch(ParseException e){
