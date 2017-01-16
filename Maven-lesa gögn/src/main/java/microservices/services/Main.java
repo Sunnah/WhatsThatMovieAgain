@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.io.FileWriter;
@@ -78,6 +79,25 @@ public class Main {
     else return "null";
   }
 
+  JSONArray getKeywords(JSONObject json){
+
+      JSONObject jo = (JSONObject) json.get("keywords");
+      JSONArray ja = (JSONArray) jo.get("keywords");
+      JSONArray keyWords = new JSONArray();
+      for(int i = 0; i<ja.size(); i++){
+        JSONObject jo1 = (JSONObject) ja.get(i);
+        System.out.println(jo1.get("name").toString());
+        keyWords.add(jo1.get("name").toString());
+
+      }
+      //JSONObject jo1 = (JSONObject) ja.get(0);
+      System.out.println("Hér er talan"+keyWords.size());
+      return keyWords;
+
+    //}
+  }
+  //dat = myObj.keywordsORG[0].keywords[1].id;
+
   int getLongest(String theme) throws Exception{
     Main example = new Main();
     int max=example.latest();
@@ -87,11 +107,14 @@ public class Main {
       try{
         JSONObject json = (JSONObject)new JSONParser().parse(response);
         if(json.get(theme)!=null){
-          String t = json.get(theme).toString();
-          int tala=t.split(",").length/2;
-          if(tala>longest){
-            longest=tala;
-            System.out.println(tala);
+          //String t = json.get(theme).toString();
+          JSONArray ja = new JSONArray();
+          ja = getKeywords(json);
+          int number = ja.size();
+          //int tala=t.split(",").length/2;
+          if(number>longest){
+            longest=number;
+            //System.out.println("her er talan number"+" "+number);
           }
         }
       }
@@ -104,12 +127,22 @@ public class Main {
   }
 
 
-
   public static void main(String[] args) throws Exception {
-    /*Main example = new Main();
-    int genres= example.getLongest("genres");
-    System.out.println("genres: "+genres);*/
     Main example = new Main();
+    //System.out.println(example.getKeywords("genres");
+    //System.out.println("genres: "+genres);
+    
+    String response = example.getWebData(138);
+    try{
+      JSONObject json = (JSONObject)new JSONParser().parse(response); 
+      System.out.println(example.getKeywords(json)); 
+      System.out.println(example.getLongest("keywords"));
+    }
+    catch(ParseException e){
+
+    }
+    
+   /* Main example = new Main();  
     FileWriter fileWriter=null;
     try{
       fileWriter = new FileWriter("movieinf.csv");
@@ -130,6 +163,8 @@ public class Main {
             fileWriter.append(example.getLanguage(json));
             fileWriter.append(";");
             fileWriter.append(example.getRelease(json));
+
+            System.out.println(example.getKeywords(json));
           }
           catch(ParseException e){
             
@@ -149,6 +184,6 @@ public class Main {
           System.out.println("Error while flushing/closing fileWriter !!!");
           e.printStackTrace();
         }
-      }
+      }*/
     }
 }
