@@ -9,6 +9,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.io.FileWriter;
+import java.util.concurrent.TimeUnit;
 
 
 
@@ -80,10 +81,11 @@ public class Main {
   }
 
   JSONArray getKeywords(JSONObject json){
-
+    JSONArray keyWords = new JSONArray();
+    if(json.get("keywords")!=null){
       JSONObject jo = (JSONObject) json.get("keywords");
       JSONArray ja = (JSONArray) jo.get("keywords");
-      JSONArray keyWords = new JSONArray();
+      
       for(int i = 0; i<ja.size(); i++){
         JSONObject jo1 = (JSONObject) ja.get(i);
         //System.out.println(jo1.get("name").toString());
@@ -92,11 +94,57 @@ public class Main {
       }
       //JSONObject jo1 = (JSONObject) ja.get(0);
       //System.out.println("Hér er talan"+keyWords.size());
-      return keyWords;
-
+      
+    }
+    return keyWords;
     //}
   }
   //dat = myObj.keywordsORG[0].keywords[1].id;
+
+  JSONArray getGenres(JSONObject json){
+    JSONArray genreArray = new JSONArray();
+    if(json.get("genres")!=null){
+      JSONArray ja = (JSONArray) json.get("genres");
+      for(int i = 0; i < ja.size(); i++){
+        JSONObject joTemp = (JSONObject) ja.get(i);
+        genreArray.add(joTemp.get("name").toString());
+      }
+      
+    }
+    return genreArray;
+  }
+
+  JSONArray getActors(JSONObject json){
+    JSONArray actorArray = new JSONArray();
+    if(json.get("casts")!=null){
+      JSONObject jo = (JSONObject) json.get("casts");
+      JSONArray ja = (JSONArray) jo.get("cast");
+      
+      for(int i = 0; i < 5 && i<ja.size(); i++){
+        JSONObject joTemp = (JSONObject) ja.get(i);
+        actorArray.add(joTemp.get("name").toString());
+      }
+      
+    }
+    return actorArray;
+  }
+
+  String getProdComp(JSONObject json){
+    if(json.get("production_companies")!=null){
+      JSONArray ja = (JSONArray) json.get("production_companies");
+      if(ja.size()>0){
+        JSONObject prodcompObject = (JSONObject) ja.get(0);
+        String prodcompString = prodcompObject.get("name").toString();
+        /*
+        for(int i = 0; i < ja.size(); i++){
+          JSONObject joTemp = (JSONObject) ja.get(i);
+          prodcompArray.add(joTemp.get("name").toString());
+        }*/
+        return prodcompString;
+      }
+    }
+    return "null";
+  }
 
   int getLongest(String theme) throws Exception{
     Main example = new Main();
@@ -128,30 +176,31 @@ public class Main {
 
 
   public static void main(String[] args) throws Exception {
-    Main example = new Main();
-    //System.out.println(example.getKeywords("genres");
-    //System.out.println("genres: "+genres);
     
-    //String response = example.getWebData(138);
-    try{
-      //JSONObject json = (JSONObject)new JSONParser().parse(response); 
-      //System.out.println(example.getKeywords(json)); 
-      System.out.println(example.getLongest("keywords"));
-    }
-    catch(ParseException e){
-
-    }
-    
-   /* Main example = new Main();  
+    Main example = new Main();  
     FileWriter fileWriter=null;
     try{
       fileWriter = new FileWriter("movieinf.csv");
-      fileWriter.append("Title;Original_language;Release_date");
+      fileWriter.append("Title;Original_language;Release_date;Production_companies");
+      for(int i = 1; i<11; i++){
+        fileWriter.append(";Genre"+i);
+      }
+      for(int i = 1; i<86; i++){
+        fileWriter.append(";Keywords"+i);
+      }
+      for(int i = 1; i<6; i++){
+        fileWriter.append(";Actor"+i);
+      }
       int max= example.latest();
-      for(int n=0; n<=20; n++){
+      for(int n=0; n<=100; n++){
+       /* if(n%40==0){
+          TimeUnit.SECONDS.sleep(1);
+        }*/
+
         String response = example.getWebData(n);
-        if(response.split(",")[0].matches(".*\"status_code\":25")){
-          System.out.println("þyrfti að gera ehv hér");
+        while(response.split(",")[0].matches(".*\"status_code\":25")){
+          //TimeUnit.SECONDS.sleep(1);
+          //System.out.println("þyrfti að gera ehv hér");
           response=example.getWebData(n);
         }
         if(!response.split(",")[0].matches(".*\"status_code\":34")){
@@ -163,13 +212,36 @@ public class Main {
             fileWriter.append(example.getLanguage(json));
             fileWriter.append(";");
             fileWriter.append(example.getRelease(json));
-
-            System.out.println(example.getKeywords(json));
+            fileWriter.append(";");
+            fileWriter.append(example.getProdComp(json));
+            JSONArray genres = example.getGenres(json);
+            for(int i = 0; i<10; i++){
+              fileWriter.append(";");
+              if(i<genres.size()){
+                fileWriter.append(genres.get(i).toString());
+              }
+            }
+           JSONArray keyWords = example.getKeywords(json);
+            for(int i = 0; i<85; i++){
+              fileWriter.append(";");
+              if(i<keyWords.size()){
+                fileWriter.append(keyWords.get(i).toString());
+              }
+            }
+            JSONArray actors = example.getActors(json);
+            for(int i = 0; i<5; i++){
+              fileWriter.append(";");
+              if(i<actors.size()){
+                fileWriter.append(actors.get(i).toString());
+              }
+            }
+            
           }
           catch(ParseException e){
             
           }
         }
+
       }
     }
       catch (Exception e) {         
@@ -184,6 +256,6 @@ public class Main {
           System.out.println("Error while flushing/closing fileWriter !!!");
           e.printStackTrace();
         }
-      }*/
+      }
     }
 }
